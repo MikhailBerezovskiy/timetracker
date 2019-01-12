@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -36,19 +37,25 @@ var s = &session{
 	Start:  time.Now(),
 	End:    time.Now(),
 	D:      time.Second,
-	Active: true,
+	Active: false,
 }
 
-func main() {
+var addr = flag.String("addr", ":8080", "http service address")
 
+func main() {
+	// load csv file into memroy
 	readSessions()
 
+	// get port for http server
+	flag.Parse()
+
+	// routes
 	http.Handle("/", http.HandlerFunc(index))
 	http.Handle("/stop", http.HandlerFunc(stop))
 	http.Handle("/start", http.HandlerFunc(start))
 	http.Handle("/download", http.HandlerFunc(serveFile))
 
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
